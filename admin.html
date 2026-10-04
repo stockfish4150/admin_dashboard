@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockfish Analyzer - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #161512;
+            --bg-panel: #21201d;
+            --bg-darker: #1a1916;
+            --bg-hover: #2d2b27;
+            --border-color: #3d3b36;
+            --text-main: #ffffff;
+            --text-muted: #8b8984;
+            --accent-blue: #3880b6;
+            --accent-blue-hover: #2c6896;
+            --accent-red: #d32f2f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-panel);
+            padding: 16px 24px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        .header-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .header-title span { color: var(--accent-blue); }
+        .auth-btn { background-color: var(--accent-blue); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .auth-btn:hover { background-color: var(--accent-blue-hover); }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .kpi-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .kpi-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); font-family: monospace; }
+        .kpi-sub { font-size: 0.75rem; color: #62615e; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+        .chart-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            position: relative;
+        }
+        .chart-header { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--text-main); }
+        
+        .table-container {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        th { background-color: var(--bg-darker); color: var(--text-muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+        td { font-size: 0.9rem; color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: var(--bg-hover); }
+
+        .modal-overlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-card { background-color: var(--bg-panel); padding: 32px; border-radius: 8px; width: 320px; border: 1px solid var(--border-color); box-shadow: 0 8px 32px rgba(0,0,0,0.5); text-align: center; }
+        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 24px; color: var(--accent-blue); }
+        .modal-input { width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; margin-bottom: 16px; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
+        
+        @media (max-width: 900px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="admin-login-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-title">관리자 로그인</div>
+        <input type="text" id="admin-id" placeholder="관리자 아이디" class="modal-input">
+        <input type="password" id="admin-pw" placeholder="비밀번호" class="modal-input" onkeypress="if(event.key === 'Enter') adminLogin()">
+        <button onclick="adminLogin()" class="auth-btn" style="width: 100%; padding: 12px; font-size: 1rem;">로그인</button>
+        <div id="login-error" style="color: var(--accent-red); margin-top: 12px; font-size: 0.85rem; display: none;">아이디 또는 비밀번호가 틀렸거나, 관리자가 아닙니다.</div>
+    </div>
+</div>
+
+<div id="admin-dashboard" class="admin-container">
+    <div class="header">
+        <div class="header-title"><span>Stockfish Analyzer</span> Admin Panel</div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <span id="admin-welcome" style="font-size: 0.9rem; color: var(--text-muted);"></span>
+            <button class="auth-btn" onclick="adminLogout()" style="background-color: var(--bg-darker); border: 1px solid var(--border-color);">로그아웃</button>
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">유저</div>
+            <div class="kpi-value" id="kpi-users">0</div>
+            <div class="kpi-sub">Users</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">분석 요청</div>
+            <div class="kpi-value" id="kpi-analyses">0</div>
+            <div class="kpi-sub">Analysis Requests</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">노드 사용량</div>
+            <div class="kpi-value" id="kpi-nodes">0.0 M</div>
+            <div class="kpi-sub">Nodes Consumed</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">오류</div>
+            <div class="kpi-value" id="kpi-errors" style="color: #d32f2f;">0</div>
+            <div class="kpi-sub">Errors</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">트래픽</div>
+            <canvas id="hourlyChart" height="100"></canvas>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header">엔진 사용량</div>
+            <canvas id="presetChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>프리셋</th>
+                    <th>사용 횟수</th>
+                    <th>사용 노드</th>
+                    <th>평균 노드</th>
+                </tr>
+            </thead>
+            <tbody id="preset-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = "https://stockfish-analyzer.serveousercontent.com";
+    let adminToken = localStorage.getItem('chess_admin_token');
+
+    let hourlyChartInstance = null;
+    let presetChartInstance = null;
+
+    function init() {
+        if (adminToken) {
+            document.getElementById('admin-login-modal').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'flex';
+            document.getElementById('admin-welcome').innerText = `관리자 대시보드`;
+            fetchAdminStats();
+        } else {
+            document.getElementById('admin-login-modal').style.display = 'flex';
+            document.getElementById('admin-dashboard').style.display = 'none';
+        }
+    }
+
+    async function adminLogin() {
+        const id = document.getElementById('admin-id').value;
+        const pw = document.getElementById('admin-pw').value;
+        
+        try {
+            const res = await fetch(`${BASE_URL}/api/admin/login`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ account_id: id, password: pw })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                adminToken = data.token;
+                localStorage.setItem('chess_admin_token', adminToken);
+                init();
+                return;
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                return;
+            }
+        } catch(e) {
+            alert("서버 연결에 실패했습니다.");
+            return;
+        }
+    }
+
+    function adminLogout() {
+        localStorage.removeItem('chess_admin_token');
+        adminToken = null;
+        document.getElementById('admin-id').value = '';
+        document.getElementById('admin-pw').value = '';
+        init();
+    }
+
+    async function fetchAdminStats() {
+        let statsData;
+
+        try {
+            const res = await fetch(`${BASE_URL}/api/admin/stats`, {
+                headers: { 'Authorization': `Bearer ${adminToken}` }
+            });
+            if(res.ok) { statsData = await res.json(); }
+            else { throw new Error(); }
+        } catch(e) {
+            console.error("데이터를 불러오지 못했습니다.");
+            return;
+        }
+
+        renderKPIs(statsData.cumulative);
+        renderHourlyChart(statsData.hourly);
+        renderPresetChart(statsData.presets);
+        renderPresetTable(statsData.presets);
+    }
+
+    function renderKPIs(data) {
+        document.getElementById('kpi-users').innerText = data.total_users.toLocaleString();
+        document.getElementById('kpi-analyses').innerText = data.total_analysis_count.toLocaleString();
+        document.getElementById('kpi-nodes').innerText = (data.total_nodes_consumed / 1000000).toFixed(1) + ' M';
+        document.getElementById('kpi-errors').innerText = data.total_errors.toLocaleString();
+    }
+
+    function renderHourlyChart(hourlyData) {
+        const ctx = document.getElementById('hourlyChart').getContext('2d');
+        if(hourlyChartInstance) hourlyChartInstance.destroy();
+
+        hourlyChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: hourlyData.map(d => d.time),
+                datasets: [
+                    {
+                        label: '분석 요청',
+                        data: hourlyData.map(d => d.requests),
+                        borderColor: '#3880b6',
+                        backgroundColor: 'rgba(56, 128, 182, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: '유저',
+                        data: hourlyData.map(d => d.active_users),
+                        borderColor: '#bababa',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                color: '#8b8984',
+                scales: {
+                    y: { grid: { color: '#2d2b27' }, ticks: { color: '#8b8984' }, beginAtZero: true },
+                    x: { grid: { display: false }, ticks: { color: '#8b8984' } }
+                },
+                plugins: { legend: { labels: { color: '#ffffff' } } }
+            }
+        });
+    }
+
+    function renderPresetChart(presetData) {
+        const sortedData = [...presetData].sort((a, b) => b.count - a.count);
+        
+        const ctx = document.getElementById('presetChart').getContext('2d');
+        if(presetChartInstance) presetChartInstance.destroy();
+
+        presetChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: sortedData.map(d => d.name),
+                datasets: [{
+                    data: sortedData.map(d => d.count),
+                    backgroundColor: ['#3880b6', '#2c6896', '#62615e', '#3d3b36', '#2d2b27'],
+                    borderWidth: 1,
+                    borderColor: '#161512'
+                }]
+            },
+            options: {
+                responsive: true,
+                color: '#ffffff',
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#8b8984', boxWidth: 12 } }
+                }
+            }
+        });
+    }
+
+    function renderPresetTable(presetData) {
+        const tbody = document.getElementById('preset-table-body');
+        tbody.innerHTML = '';
+        
+        const sortedData = [...presetData].sort((a, b) => b.count - a.count);
+
+        sortedData.forEach(p => {
+            const tr = document.createElement('tr');
+            const avgNodes = p.count > 0 ? (p.nodes / p.count) : 0;
+            
+            tr.innerHTML = `
+                <td><b>${p.name}</b></td>
+                <td>${p.count.toLocaleString()}</td>
+                <td style="font-family: monospace;">${(p.nodes / 1000000).toFixed(2)} M</td>
+                <td style="color: var(--text-muted); font-family: monospace;">${(avgNodes / 1000000).toFixed(2)} M</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
