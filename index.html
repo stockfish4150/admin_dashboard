@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Antigravity Web Studio • GitHub Pages Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080c16;
+            --bg-surface: #0e1626;
+            --bg-card: rgba(16, 24, 40, 0.75);
+            --bg-input: rgba(10, 16, 30, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-focus: #3b82f6;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-glow: rgba(59, 130, 246, 0.25);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --accent-green: #10b981;
+            --accent-green-bg: rgba(16, 185, 129, 0.12);
+            --accent-purple: #a855f7;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #151d38 0%, var(--bg-base) 80%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Bar */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: rgba(10, 16, 30, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .brand-meta h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+        .brand-meta p { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Backend Server Config Bar in Header */
+        .server-config-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+
+        .config-input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 5px 10px;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+        }
+        .config-input:focus { border-color: var(--border-focus); }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+        .status-connected .status-dot { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .status-connected { color: #34d399; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+        .status-disconnected .status-dot { background: #ef4444; }
+        .status-disconnected { color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
+
+        .btn-sm {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-sm:hover { background: rgba(255, 255, 255, 0.15); }
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* Workspace Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 460px 1fr;
+            gap: 16px;
+            padding: 16px 24px;
+            flex: 1;
+            height: calc(100vh - 64px);
+            overflow: hidden;
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
+            }
+        }
+
+        /* Left Pane: Chat & Agent Steps */
+        .left-pane {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .pane-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .pane-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+        .chat-scroll {
+            flex: 1;
+            padding: 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .msg-bubble {
+            max-width: 90%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-agent {
+            align-self: flex-start;
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid var(--border-subtle);
+            color: #f1f5f9;
+            border-bottom-left-radius: 4px;
+        }
+
+        .step-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 6px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 6px;
+            padding: 8px 16px;
+            overflow-x: auto;
+            border-top: 1px solid var(--border-subtle);
+            background: rgba(11, 16, 28, 0.5);
+        }
+
+        .quick-chip {
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .quick-chip:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.1); }
+
+        .chat-input-area {
+            padding: 12px 16px;
+            background: rgba(11, 16, 28, 0.8);
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-area textarea {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            font-family: inherit;
+            resize: none;
+            height: 48px;
+            outline: none;
+        }
+        .chat-input-area textarea:focus { border-color: var(--border-focus); }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .send-btn:hover { background: var(--primary-hover); }
+
+        /* Right Pane: Multi-Tab Workspace */
+        .right-pane {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .workspace-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 4px 8px 0;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #60a5fa;
+            background: rgba(30, 41, 59, 0.7);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-content { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+        .tab-content.active { display: flex; }
+
+        /* Tab 1: Generative UI Sandbox */
+        .widget-toolbar {
+            padding: 10px 18px;
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .widget-title-badge {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .widget-actions { display: flex; gap: 8px; }
+
+        .sandbox-frame {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #0b0f19;
+        }
+
+        /* Tab 2: Code Patcher */
+        .patch-container {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+        .input-group input, .input-group textarea {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .code-font { font-family: 'JetBrains Mono', monospace; }
+
+        /* Tab 3: MCP & Terminal */
+        .mcp-container {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tool-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .tool-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #a78bfa;
+            font-size: 0.9rem;
+        }
+
+        .tool-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .terminal-box {
+            background: #050811;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #a7f3d0;
+            min-height: 180px;
+            max-height: 320px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand-area">
+            <div class="brand-logo">🪐</div>
+            <div class="brand-meta">
+                <h1>Antigravity Web Studio</h1>
+                <p>GitHub Pages Edition • Remote Backend Connected</p>
+            </div>
+        </div>
+
+        <!-- 백엔드 서버 주소 및 키 설정 바 -->
+        <div class="server-config-bar">
+            <label style="font-size: 0.75rem; color: var(--text-muted);">Serveo URL:</label>
+            <input type="text" id="backendUrlInput" class="config-input" placeholder="https://antigravity-hub.serveo.net" style="width: 260px;">
+            
+            <label style="font-size: 0.75rem; color: var(--text-muted);">API Key / Token:</label>
+            <input type="password" id="apiKeyInput" class="config-input" placeholder="••••••••••••" style="width: 140px;">
+            
+            <button class="btn-sm btn-primary" onclick="saveAndConnect()">저장 & 연결</button>
+            <div id="connStatusBadge" class="status-badge status-disconnected">
+                <span class="status-dot"></span>
+                <span id="connStatusText">연결 대기</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <!-- 좌측: AI Console -->
+        <div class="left-pane">
+            <div class="pane-header">
+                <div class="pane-title">
+                    <span>⚡ AI Agent Console</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-dim);">GitHub.io Client</span>
+            </div>
+
+            <div class="chat-scroll" id="chatScroll">
+                <div class="msg-bubble msg-agent">
+                    안녕하세요! <b>GitHub Pages Antigravity Studio</b>에 연결되었습니다.<br>
+                    상단의 <b>Serveo URL</b>과 <b>API Key</b>를 설정하시면, 원격 백엔드와 안전하게 통신하며 AI 에이전트와 도구를 사용할 수 있습니다.
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <div class="quick-chip" onclick="quickPrompt('workspace 상태 및 디렉터리 목록을 조회해줘')">📁 디렉터리 탐색</div>
+                <div class="quick-chip" onclick="quickPrompt('멋진 반응형 주식 차트 HTML 위젯을 생성해서 우측 Generative UI에 렌더링해줘')">🎨 차트 위젯 생성</div>
+                <div class="quick-chip" onclick="quickPrompt('간단한 카운터 인터랙티브 위젯을 샌드박스에 렌더링해줘')">🚀 인터랙티브 위젯</div>
+                <div class="quick-chip" onclick="quickPrompt('main.py 파일의 첫 30줄을 조회해줘')">🔍 파일 검사</div>
+            </div>
+
+            <div class="chat-input-area">
+                <textarea id="promptInput" placeholder="지시사항을 입력하세요 (Enter: 전송, Shift+Enter: 줄바꿈)..."></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendPrompt()">전송</button>
+            </div>
+        </div>
+
+        <!-- 우측: 인터랙티브 워크스페이스 -->
+        <div class="right-pane">
+            <div class="workspace-tabs">
+                <button class="tab-btn active" onclick="switchTab('widgetTab', this)">🎨 Generative UI 샌드박스</button>
+                <button class="tab-btn" onclick="switchTab('patcherTab', this)">⚡ Code Patcher</button>
+                <button class="tab-btn" onclick="switchTab('mcpTab', this)">🛠️ MCP 도구 & 터미널</button>
+            </div>
+
+            <!-- 탭 1: Generative UI 샌드박스 -->
+            <div id="widgetTab" class="tab-content active">
+                <div class="widget-toolbar">
+                    <div class="widget-title-badge">
+                        <span>✨</span>
+                        <span id="currentWidgetTitle">Antigravity Live Widget Engine</span>
+                    </div>
+                    <div class="widget-actions">
+                        <button class="btn-sm" onclick="loadSampleWidget('chart')">📈 주식 차트 샘플</button>
+                        <button class="btn-sm" onclick="loadSampleWidget('game')">🎮 미니 게임 샘플</button>
+                        <button class="btn-sm" onclick="refreshSandbox()">🔄 새로고침</button>
+                        <button class="btn-sm" onclick="openSandboxNewTab()">↗️ 새 창</button>
+                    </div>
+                </div>
+                <iframe id="sandboxIframe" class="sandbox-frame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+            </div>
+
+            <!-- 탭 2: Code Patcher -->
+            <div id="patcherTab" class="tab-content">
+                <div class="patch-container">
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>대상 파일 경로</label>
+                            <input type="text" id="patchFilePath" class="code-font" placeholder="/home/it2299/.../main.py">
+                        </div>
+                        <div class="input-group">
+                            <label>함수/클래스명</label>
+                            <input type="text" id="patchTargetName" class="code-font" placeholder="target_function">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>수정 지시사항</label>
+                        <textarea id="patchInstruction" placeholder="어떤 부분을 어떻게 수정할지 기술하세요..." style="height: 100px;"></textarea>
+                    </div>
+                    <button class="btn-sm btn-primary" style="padding: 12px; font-weight: 600;" onclick="executePatch()">안전 패치 실행</button>
+                    
+                    <div id="patchResultBox" style="display:none; background: rgba(15,23,42,0.6); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
+                        <h4 id="patchResultTitle" style="margin-bottom: 8px;">결과</h4>
+                        <pre id="patchResultContent" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #e2e8f0; white-space: pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 3: MCP 도구 & 터미널 -->
+            <div id="mcpTab" class="tab-content">
+                <div class="mcp-container">
+                    <!-- 외부 MCP 클라이언트 연동 가이드 카드 -->
+                    <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 12px; padding: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <h3 style="font-size: 1rem; color: #c084fc; display: flex; align-items: center; gap: 8px;">
+                                <span>🌐</span> 백엔드 MCP 원격 엔드포인트 정보
+                            </h3>
+                            <button class="btn-sm" style="background: #6366f1; color: white;" onclick="copyMcpConfig()">📋 설정 JSON 복사</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.85); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 6px;">
+                                <span style="color: #94a3b8; min-width: 100px;">📡 MCP SSE URL:</span>
+                                <code id="mcpSseUrlDisplay" style="color: #38bdf8; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin: 0 4px; word-break: break-all; flex: 1;">연결 확인 필요</code>
+                                <button class="btn-sm" onclick="copyText(document.getElementById('mcpSseUrlDisplay').innerText)">복사</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 1rem; color: #a78bfa;">💻 Interactive Command Runner</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="cmdInput" class="code-font" placeholder="ls -la / pwd / git status (Enter로 실행)" style="flex:1; background: var(--bg-input); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 8px; color: white;">
+                        <button class="btn-sm btn-primary" onclick="runTerminalCmd()">실행</button>
+                    </div>
+                    <div class="terminal-box" id="terminalOutput">Terminal initialized. Connect backend to run commands.</div>
+
+                    <h3 style="font-size: 1rem; color: #60a5fa; margin-top: 10px;">🛠️ Registered MCP Tools</h3>
+                    <div id="mcpToolsList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <!-- 도구 목록 동적 로드 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================================================
+        // 1. 설정 및 상태 관리 (localStorage 영구 저장)
+        // ==============================================================================
+        const STORAGE_KEY_BACKEND = 'antigravity_backend_url';
+        const STORAGE_KEY_APIKEY = 'antigravity_api_key';
+
+        function getBackendUrl() {
+            let url = localStorage.getItem(STORAGE_KEY_BACKEND) || '';
+            return url.replace(/\/+$/, ''); // 끝 슬래시 제거
+        }
+
+        function getApiKey() {
+            return localStorage.getItem(STORAGE_KEY_APIKEY) || '';
+        }
+
+        // 공통 API Fetch 래퍼 (CORS 및 Header 기반 인증 자동 주입)
+        async function apiFetch(endpoint, options = {}) {
+            const baseUrl = getBackendUrl();
+            if (!baseUrl) {
+                throw new Error('백엔드 Serveo URL이 설정되지 않았습니다. 상단에서 입력해주세요.');
+            }
+
+            const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+            const headers = options.headers || {};
+
+            // API 키 또는 토큰 주입
+            const apiKey = getApiKey();
+            if (apiKey) {
+                headers['X-API-Key'] = apiKey;
+                headers['Authorization'] = `Bearer ${apiKey}`;
+            }
+
+            if (!headers['Content-Type'] && options.body && typeof options.body === 'string') {
+                headers['Content-Type'] = 'application/json';
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers: headers,
+                mode: 'cors'
+            });
+
+            return response;
+        }
+
+        // ==============================================================================
+        // 2. 연결 테스트 및 백엔드 상태 확인
+        // ==============================================================================
+        async function checkConnection() {
+            const badge = document.getElementById('connStatusBadge');
+            const text = document.getElementById('connStatusText');
+            const backend = getBackendUrl();
+
+            if (!backend) {
+                badge.className = 'status-badge status-disconnected';
+                text.innerText = 'URL 미입력';
+                return false;
+            }
+
+            badge.className = 'status-badge';
+            text.innerText = '확인 중...';
+
+            try {
+                const res = await apiFetch('/api/tunnel/status');
+                if (res.ok) {
+                    badge.className = 'status-badge status-connected';
+                    text.innerText = '연결됨 (Online)';
+                    loadMcpTools();
+                    loadMcpConnectionInfo();
+                    refreshSandbox();
+                    return true;
+                } else {
+                    badge.className = 'status-badge status-disconnected';
+                    text.innerText = `오류 (${res.status})`;
+                    return false;
+                }
+            } catch (err) {
+                badge.className = 'status-badge status-disconnected';
+                text.innerText = '연결 실패';
+                return false;
+            }
+        }
+
+        function saveAndConnect() {
+            const backendInput = document.getElementById('backendUrlInput').value.trim();
+            const apiKeyInput = document.getElementById('apiKeyInput').value.trim();
+
+            if (backendInput) {
+                localStorage.setItem(STORAGE_KEY_BACKEND, backendInput);
+            }
+            if (apiKeyInput) {
+                localStorage.setItem(STORAGE_KEY_APIKEY, apiKeyInput);
+            }
+
+            checkConnection().then(ok => {
+                if (ok) {
+                    appendMsg(`✅ 백엔드 (${backendInput}) 연결에 성공했습니다!`, false, 'System');
+                } else {
+                    appendMsg(`⚠️ 백엔드 (${backendInput})에 연결할 수 없습니다. 주소와 API 키를 확인해주세요.`, false, 'Connection Warning');
+                }
+            });
+        }
+
+        // ==============================================================================
+        // 3. UI 탭 제어
+        // ==============================================================================
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // ==============================================================================
+        // 4. Generative UI 샌드박스 렌더링
+        // ==============================================================================
+        async function refreshSandbox() {
+            const backend = getBackendUrl();
+            const frame = document.getElementById('sandboxIframe');
+            if (!backend) return;
+
+            try {
+                // 직접 iframe src를 로드하거나, API로 HTML을 가져와 srcdoc으로 렌더링
+                const res = await apiFetch('/api/widget/current');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.html_content) {
+                        frame.srcdoc = data.html_content;
+                        if (data.title) {
+                            document.getElementById('currentWidgetTitle').innerText = data.title;
+                        }
+                        return;
+                    }
+                }
+                frame.src = `${backend}/widget/embed?t=${Date.now()}`;
+            } catch (e) {
+                frame.src = `${backend}/widget/embed?t=${Date.now()}`;
+            }
+        }
+
+        function openSandboxNewTab() {
+            const backend = getBackendUrl();
+            if (backend) {
+                window.open(`${backend}/widget/embed`, '_blank');
+            }
+        }
+
+        async function loadSampleWidget(type) {
+            let title = '';
+            let html = '';
+            if (type === 'chart') {
+                title = '실시간 금융/주식 지표 차트 위젯';
+                html = `<div style="font-family: -apple-system, sans-serif; padding: 20px; background: #0f172a; color: white; border-radius: 12px;">
+                    <h3 style="color: #38bdf8; margin-bottom: 6px;">📈 Stock / Crypto Live Tracker</h3>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px;">Antigravity Generative UI 가상 지표</p>
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                        <div style="flex:1; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.75rem; color: #94a3b8;">BTC/USD</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;">$68,450.00 (+4.2%)</div>
+                        </div>
+                        <div style="flex:1; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.75rem; color: #94a3b8;">NVDA</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #60a5fa;">$134.80 (+2.8%)</div>
+                        </div>
+                    </div>
+                    <div style="height: 120px; display: flex; align-items: flex-end; gap: 8px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        <div style="flex:1; height: 40%; background: #3b82f6; border-radius: 4px;"></div>
+                        <div style="flex:1; height: 60%; background: #3b82f6; border-radius: 4px;"></div>
+                        <div style="flex:1; height: 50%; background: #3b82f6; border-radius: 4px;"></div>
+                        <div style="flex:1; height: 75%; background: #3b82f6; border-radius: 4px;"></div>
+                        <div style="flex:1; height: 90%; background: #10b981; border-radius: 4px;"></div>
+                        <div style="flex:1; height: 85%; background: #10b981; border-radius: 4px;"></div>
+                        <div style="flex:1; height: 100%; background: #10b981; border-radius: 4px;"></div>
+                    </div>
+                </div>`;
+            } else {
+                title = '인터랙티브 캔버스 파티클';
+                const sOpen = '<' + 'script>';
+                const sClose = '<' + '/script>';
+                html = `<div style="text-align: center; padding: 16px; background: #090d16; color: white;">
+                    <canvas id="cvs" width="400" height="240" style="background: #020617; border-radius: 12px; border: 1px solid #1e293b;"></canvas>
+                    <p style="margin-top: 10px; font-size: 0.85rem; color: #94a3b8;">마우스를 올려보세요!</p>
+                    ` + sOpen + `
+                        const c = document.getElementById('cvs');
+                        const ctx = c.getContext('2d');
+                        let pts = Array.from({length: 40}, () => ({x: Math.random()*400, y: Math.random()*240, vx: (Math.random()-0.5)*2, vy: (Math.random()-0.5)*2}));
+                        function loop() {
+                            ctx.fillStyle = 'rgba(2, 6, 23, 0.2)';
+                            ctx.fillRect(0,0,400,240);
+                            ctx.fillStyle = '#60a5fa';
+                            pts.forEach(p => {
+                                p.x += p.vx; p.y += p.vy;
+                                if (p.x<0||p.x>400) p.vx*=-1;
+                                if (p.y<0||p.y>240) p.vy*=-1;
+                                ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
+                            });
+                            requestAnimationFrame(loop);
+                        }
+                        loop();
+                    ` + sClose + `
+                </div>`;
+            }
+
+            try {
+                await apiFetch('/api/widget/render', {
+                    method: 'POST',
+                    body: JSON.stringify({ title, html_content: html })
+                });
+                refreshSandbox();
+            } catch (e) {
+                alert('위젯 전송 실패: ' + e.message);
+            }
+        }
+
+        // ==============================================================================
+        // 5. AI Console (채팅 & 프롬프트 전송)
+        // ==============================================================================
+        function appendMsg(text, isUser = false, stepInfo = null) {
+            const chat = document.getElementById('chatScroll');
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble ' + (isUser ? 'msg-user' : 'msg-agent');
+            
+            if (stepInfo) {
+                const step = document.createElement('div');
+                step.className = 'step-pill';
+                step.innerText = '⚙️ ' + stepInfo;
+                bubble.appendChild(step);
+            }
+
+            const content = document.createElement('div');
+            content.innerHTML = text.replace(/\n/g, '<br>');
+            bubble.appendChild(content);
+
+            chat.appendChild(bubble);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function sendPrompt() {
+            const input = document.getElementById('promptInput');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            appendMsg(prompt, true);
+            input.value = '';
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            appendMsg('응답 및 도구 실행을 처리하고 있습니다...', false, 'MCP & Gemini Engine');
+
+            try {
+                const res = await apiFetch('/api/agent/chat', {
+                    method: 'POST',
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                
+                // 마지막 로딩 말풍선 제거
+                const chat = document.getElementById('chatScroll');
+                chat.removeChild(chat.lastChild);
+
+                if (data.success) {
+                    appendMsg(data.response, false, data.step);
+                    if (data.widget_updated) {
+                        refreshSandbox();
+                    }
+                } else {
+                    appendMsg('오류: ' + (data.message || data.detail), false, 'Error');
+                }
+            } catch (err) {
+                const chat = document.getElementById('chatScroll');
+                if (chat.lastChild) chat.removeChild(chat.lastChild);
+                appendMsg('통신 실패: ' + err.message, false, 'Network Error');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function quickPrompt(text) {
+            document.getElementById('promptInput').value = text;
+            sendPrompt();
+        }
+
+        document.getElementById('promptInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendPrompt();
+            }
+        });
+
+        // ==============================================================================
+        // 6. 터미널 명령 실행
+        // ==============================================================================
+        async function runTerminalCmd() {
+            const input = document.getElementById('cmdInput');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            const term = document.getElementById('terminalOutput');
+            term.innerText += `\n$ ${cmd}\n실행 중...\n`;
+            
+            try {
+                const res = await apiFetch('/api/mcp/execute', {
+                    method: 'POST',
+                    body: JSON.stringify({ name: 'run_command', arguments: { command: cmd } })
+                });
+                const data = await res.json();
+                term.innerText += (data.content?.[0]?.text || JSON.stringify(data)) + '\n';
+                term.scrollTop = term.scrollHeight;
+            } catch (e) {
+                term.innerText += `실행 실패: ${e.message}\n`;
+            }
+        }
+
+        const cmdInputElem = document.getElementById('cmdInput');
+        if (cmdInputElem) {
+            cmdInputElem.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    runTerminalCmd();
+                }
+            });
+        }
+
+        // ==============================================================================
+        // 7. Code Patcher
+        // ==============================================================================
+        async function executePatch() {
+            const filePath = document.getElementById('patchFilePath').value.trim();
+            const targetName = document.getElementById('patchTargetName').value.trim();
+            const instruction = document.getElementById('patchInstruction').value.trim();
+
+            if (!filePath || !targetName || !instruction) {
+                alert('파일 경로, 대상 함수명, 지시사항을 모두 입력하세요.');
+                return;
+            }
+
+            const box = document.getElementById('patchResultBox');
+            const title = document.getElementById('patchResultTitle');
+            const content = document.getElementById('patchResultContent');
+            box.style.display = 'block';
+            title.innerText = '⏳ 웹 Gemini 질의 및 안전 패치 진행 중...';
+            content.innerText = '잠시만 기다려주세요...';
+
+            try {
+                const res = await apiFetch('/api/patch/execute', {
+                    method: 'POST',
+                    body: JSON.stringify({ file_path: filePath, target_name: targetName, instruction: instruction })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    title.innerText = '✅ 패치 적용 완료';
+                    content.innerText = `요약: ${data.summary}\n상태: ${data.message}`;
+                } else {
+                    title.innerText = '❌ 패치 실패';
+                    content.innerText = data.message || '오류 발생';
+                }
+            } catch (e) {
+                title.innerText = '❌ 통신 에러';
+                content.innerText = e.message;
+            }
+        }
+
+        // ==============================================================================
+        // 8. MCP 도구 및 연동 정보 로드
+        // ==============================================================================
+        let mcpConfigJson = '';
+
+        async function loadMcpTools() {
+            try {
+                const res = await apiFetch('/mcp/tools');
+                const data = await res.json();
+                const list = document.getElementById('mcpToolsList');
+                list.innerHTML = '';
+                (data.tools || []).forEach(t => {
+                    const card = document.createElement('div');
+                    card.className = 'tool-card';
+                    card.innerHTML = `
+                        <div class="tool-header">
+                            <span class="tool-name">⚡ ${t.name}</span>
+                        </div>
+                        <div class="tool-desc">${t.description}</div>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (e) {}
+        }
+
+        async function loadMcpConnectionInfo() {
+            try {
+                const res = await apiFetch('/api/mcp/info');
+                const data = await res.json();
+                if (data) {
+                    mcpConfigJson = data.config_json || '';
+                    const sseElem = document.getElementById('mcpSseUrlDisplay');
+                    const backend = getBackendUrl();
+                    const apiKey = getApiKey() || data.api_key;
+                    if (sseElem) sseElem.innerText = `${backend}/mcp/sse?api_key=${apiKey}`;
+                }
+            } catch (e) {}
+        }
+
+        function copyText(str) {
+            if (!str) return;
+            navigator.clipboard.writeText(str).then(() => {
+                alert('클립보드에 복사되었습니다:\n' + str);
+            }).catch(() => {
+                prompt('아래 내용을 복사하세요:', str);
+            });
+        }
+
+        function copyMcpConfig() {
+            if (!mcpConfigJson) {
+                alert('MCP 설정 정보를 아직 불러오지 못했습니다.');
+                return;
+            }
+            navigator.clipboard.writeText(mcpConfigJson).then(() => {
+                alert('안티그래비티 / MCP 설정 JSON이 클립보드에 복사되었습니다!\n\nantigravity.json 또는 claude_desktop_config.json 에 붙여넣어 즉시 연결할 수 있습니다.');
+            }).catch(() => {
+                prompt('아래 JSON 설정을 복사하세요:', mcpConfigJson);
+            });
+        }
+
+        // ==============================================================================
+        // 초기화
+        // ==============================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedBackend = localStorage.getItem(STORAGE_KEY_BACKEND);
+            const savedApiKey = localStorage.getItem(STORAGE_KEY_APIKEY);
+
+            if (savedBackend) {
+                document.getElementById('backendUrlInput').value = savedBackend;
+            }
+            if (savedApiKey) {
+                document.getElementById('apiKeyInput').value = savedApiKey;
+            }
+
+            if (savedBackend) {
+                checkConnection();
+            }
+        });
+    </script>
+</body>
+</html>
